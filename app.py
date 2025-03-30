@@ -3,23 +3,28 @@ import pandas as pd
 import numpy as np
 import plotly.express as px
 from sklearn.ensemble import RandomForestClassifier
-from sklearn.model_selection import train_test_split
-from sklearn.metrics import accuracy_score, roc_curve, auc, confusion_matrix
+from sklearn.model_selection import train_test_split, GridSearchCV
+from sklearn.metrics import (accuracy_score, roc_curve, auc, 
+                           confusion_matrix, classification_report)
 import joblib
 import os
+from imblearn.over_sampling import SMOTE
 
-        # background-color: #2f2f2f;
+# Ignore warnings for cleaner output
+import warnings
+warnings.filterwarnings('ignore')
+
 # Custom CSS for styling
 st.markdown(
     """
     <style>
     .stApp {
-        color:white;
+        background-color: #2f2f2f;
+        color: white;
         font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
     }
     .stSidebar {
         background-color: #2c3e50;
-        color: black;
         padding: 20px;
         border-radius: 10px;
     }
@@ -66,7 +71,7 @@ st.markdown(
     .card {
         background-color: white;
         padding: 20px;
-        color:black;
+        color: black;
         border-radius: 10px;
         box-shadow: 0 2px 10px rgba(0,0,0,0.1);
         margin-bottom: 20px;
@@ -81,7 +86,18 @@ st.markdown(
 
 # Constants
 MODEL_PATH = 'machine_failure_model.pkl'
-DATA_FILE = 'machine.csv'  # Local file in the same directory
+DATA_FILE = 'machine.csv'
+
+# Hero Section
+st.markdown(
+    """
+    <div style="background-color: #00008B; padding: 20px; border-radius: 10px; color: white;">
+        <h1 style="margin: 0;">Machine Failure Prediction System</h1>
+        <p style="margin: 0;">Predict equipment failures before they happen using advanced machine learning.</p>
+    </div>
+    """,
+    unsafe_allow_html=True
+)
 
 def load_data():
     """Load data from local file with error handling"""
@@ -106,28 +122,40 @@ def train_and_save_model():
     X = df.drop('Machine failure', axis=1)
     y = df['Machine failure']
     
+    # Handle imbalanced data
+    smote = SMOTE(random_state=42)
+    X_res, y_res = smote.fit_resample(X, y)
+    
     # Train-test split
     X_train, X_test, y_train, y_test = train_test_split(
-        X, y, test_size=0.3, random_state=42
+        X_res, y_res, test_size=0.25, random_state=42, stratify=y_res
     )
     
-    # Train model
-    model = RandomForestClassifier(
-        n_estimators=200,
-        max_depth=10,
-        min_samples_split=5,
-        min_samples_leaf=2,
-        random_state=42,
-        n_jobs=-1
-    )
-    model.fit(X_train, y_train)
+    # Hyperparameter tuning
+    param_grid = {
+        'n_estimators': [100, 150, 200],
+        'max_depth': [5, 10, 15],
+        'min_samples_split': [2, 5, 10],
+        'min_samples_leaf': [1, 2, 4]
+    }
+    
+    rf = RandomForestClassifier(random_state=42)
+    grid_search = GridSearchCV(estimator=rf, param_grid=param_grid, 
+                             cv=5, scoring='accuracy', n_jobs=-1)
+    grid_search.fit(X_train, y_train)
+    
+    # Get best model
+    best_rf = grid_search.best_estimator_
     
     # Save model
     model_data = {
-        'model': model,
+        'model': best_rf,
         'features': X.columns.tolist(),
+        'X_train': X_train,
+        'y_train': y_train,
         'X_test': X_test,
-        'y_test': y_test
+        'y_test': y_test,
+        'best_params': grid_search.best_params_
     }
     joblib.dump(model_data, MODEL_PATH)
     return model_data
@@ -141,6 +169,13 @@ def load_model():
     try:
         model_data = joblib.load(MODEL_PATH)
         st.success("Loaded pre-trained model successfully!")
+        
+        # Backward compatibility check
+        required_keys = ['model', 'features', 'X_test', 'y_test']
+        if not all(key in model_data for key in required_keys):
+            st.warning("Old model format detected. Retraining new model...")
+            return train_and_save_model()
+            
         return model_data
     except Exception as e:
         st.warning(f"Error loading model: {str(e)}. Training a new model...")
@@ -150,13 +185,17 @@ def load_model():
 model_data = load_model()
 model = model_data['model']
 features = model_data['features']
-X_test = model_data['X_test']
-y_test = model_data['y_test']
+X_train = model_data.get('X_train', None)
+y_train = model_data.get('y_train', None)
+X_test = model_data.get('X_test', None)
+y_test = model_data.get('y_test', None)
+best_params = model_data.get('best_params', {})
 
 # Sidebar for user input
 st.sidebar.markdown('<div class="sidebar-header">Machine Parameters</div>', unsafe_allow_html=True)
+st.sidebar.write("Enter current operating conditions:")
 
-# Feature information - now with suggested ranges in description
+# Feature information
 feature_info = {
     'Air temperature [K]': {
         'desc': 'Ambient air temperature (295-315 K)',
@@ -198,18 +237,17 @@ for feature in features:
         st.sidebar.markdown(f"**{feature}**")
         st.sidebar.markdown(f'<div class="input-description">{info["desc"]}</div>', unsafe_allow_html=True)
         user_input[feature] = st.sidebar.number_input(
-            label=f"Enter value ({info['unit']})",
+            label=f"Value in {info['unit']}",
             value=info['default'],
             step=info['step'],
             key=feature,
             format="%.1f" if isinstance(info['default'], float) else "%d"
         )
     else:
-        # Handle other features (like one-hot encoded ones)
-        user_input[feature] = 0.0  # Default value for other features
+        user_input[feature] = 0.0
 
 # Prediction button
-if st.sidebar.button("Predict Failure Risk", key="predict_button"):
+if st.sidebar.button("Predict Failure Risk"):
     # Prepare input data
     input_data = [user_input[feature] for feature in features]
     
@@ -217,41 +255,17 @@ if st.sidebar.button("Predict Failure Risk", key="predict_button"):
     prediction = model.predict([input_data])[0]
     probability = model.predict_proba([input_data])[0][1]
     
-    # Display results
-    st.markdown('<div class="card"><h3>Prediction Result</h3></div>', unsafe_allow_html=True)
-    
-    if prediction == 1:
-        st.error(f"⚠️ High Risk of Failure (Probability: {probability:.1%})")
-        st.markdown("""
-        <div style="background-color: #fdecea; padding: 15px; border-radius: 5px; margin-bottom: 20px;color:black;">
-            <p style="margin: 0;">Recommend immediate maintenance inspection. Parameters indicate potential failure conditions.</p>
+    # Display prediction result
+    st.markdown(
+        f"""
+        <div class="card">
+            <h3>Prediction: {'Machine WILL Fail ⚠️' if prediction == 1 else 'Machine Will NOT Fail ✅'}</h3>
+            <p>Confidence Score: {probability:.2f}</p>
         </div>
-        """, unsafe_allow_html=True)
-    else:
-        st.success(f"✅ Normal Operation (Probability: {1-probability:.1%})")
-        st.markdown("""
-        <div style="background-color: #e8f5e9; padding: 15px; border-radius: 5px;color:black; margin-bottom: 20px;">
-            <p style="margin: 0;">Machine operating within normal parameters. Continue routine monitoring.</p>
-        </div>
-        """, unsafe_allow_html=True)
+        """,
+        unsafe_allow_html=True
+    )
     
-    # Show input parameters
-    st.subheader("Input Parameters")
-    cols = st.columns(2)
-    for i, (feature, value) in enumerate(user_input.items()):
-        if feature in feature_info:
-            with cols[i % 2]:
-                st.markdown(f"**{feature}**: {value} {feature_info[feature]['unit']}")
-
-# Main page content
-st.title("Machine Failure Prediction System")
-st.markdown("""
-<div class="card">
-    <p>This system predicts potential machine failures using a Random Forest classifier trained on historical equipment data.</p>
-    <p>Enter the current machine parameters in the sidebar and click <strong>Predict Failure Risk</strong> to get an assessment.</p>
-</div>
-""", unsafe_allow_html=True)
-
     # Explanation for Confidence Score
     st.markdown(
         """
@@ -303,14 +317,7 @@ st.markdown("""
         fig_roc.add_shape(type='line', line=dict(dash='dash'), x0=0, x1=1, y0=0, y1=1)
         st.plotly_chart(fig_roc)
 
-        # Model Accuracy
-        accuracy_train = accuracy_score(y_train, model.predict(X_train)) if X_train is not None else None
-        accuracy_test = accuracy_score(y_test, predictions_val)
-        
-        # Replace the Model Performance section with this:
-                # Replace the Model Performance section with this:
-
-# Model Performance
+        # Model Performance
         st.markdown("<h2 style='color: white;'>Model Performance</h2>", unsafe_allow_html=True)
         
         if X_test is not None and y_test is not None:
