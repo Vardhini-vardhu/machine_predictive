@@ -14,7 +14,7 @@ st.markdown(
     """
     <style>
     .stApp {
-        color:black;
+        color:white;
         font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
     }
     .stSidebar {
@@ -66,7 +66,7 @@ st.markdown(
     .card {
         background-color: white;
         padding: 20px;
-        color:black;
+        color:bblack;
         border-radius: 10px;
         box-shadow: 0 2px 10px rgba(0,0,0,0.1);
         margin-bottom: 20px;
