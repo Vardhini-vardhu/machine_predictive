@@ -19,62 +19,65 @@ st.markdown(
     """
     <style>
     .stApp {
-        background-color: #1e1e1e;
-        color: #ffffff;
-        font-family: 'Arial', sans-serif;
+        background-color: #2f2f2f;
+        color: white;
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
     }
     .stSidebar {
-        background-color: #2e2e2e;
+        background-color: #2c3e50;
         padding: 20px;
         border-radius: 10px;
-        box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1);
-    }
-    .stButton button {
-        background-color: #4CAF50;
-        color: white;
-        font-size: 16px;
-        padding: 10px 20px;
-        border-radius: 5px;
-        border: none;
-        width: 100%;
-    }
-    .stButton button:hover {
-        background-color: #45a049;
-    }
-    .card {
-        background-color: #2e2e2e;
-        padding: 20px;
-        border-radius: 10px;
-        box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1);
-        margin-bottom: 20px;
-    }
-    .card h3 {
-        margin-top: 0;
-        color: #4CAF50;
-    }
-    .explanation {
-        font-size: 14px;
-        color: #ffffff;
-        margin-bottom: 20px;
-    }
-    .highlight {
-        color: #4CAF50;
-        font-weight: bold;
     }
     .stNumberInput input, .stTextInput input {
-        background-color: #3d3d3d !important;
-        color: white !important;
-        border: 1px solid #4CAF50 !important;
+        background-color: #ecf0f1 !important;
+        color: #2c3e50 !important;
+        border: 1px solid #bdc3c7 !important;
+        border-radius: 5px !important;
+        padding: 8px 12px !important;
     }
     .stNumberInput label, .stTextInput label {
-        color: #4CAF50 !important;
-        font-weight: bold !important;
+        color: #ecf0f1 !important;
+        font-weight: 500 !important;
     }
-    .input-range {
-        color: #b3b3b3;
+    .stButton button {
+        background-color: #00008B;
+        color: white;
+        border: none;
+        border-radius: 5px;
+        padding: 10px 24px;
+        font-size: 16px;
+        font-weight: 500;
+        width: 100%;
+        transition: all 0.3s;
+    }
+    .stButton button:hover {
+        background-color: #2980b9;
+        transform: translateY(-1px);
+        box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+    }
+    .input-description {
+        color: #ecf0f1;
         font-size: 12px;
         margin-top: -10px;
-        margin-bottom: 10px;
+        margin-bottom: 15px;
+    }
+    .sidebar-header {
+        color: #ecf0f1;
+        font-size: 1.5rem;
+        margin-bottom: 20px;
+        border-bottom: 2px solid #3498db;
+        padding-bottom: 10px;
+    }
+    .card {
+        background-color: white;
+        padding: 20px;
+        color: black;
+        border-radius: 10px;
+        box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        margin-bottom: 20px;
+    }
+    .feature-input-section {
+        margin-bottom: 20px;
     }
     </style>
     """,
@@ -88,7 +91,7 @@ DATA_FILE = 'machine.csv'
 # Hero Section
 st.markdown(
     """
-    <div style="background-color: #4CAF50; padding: 20px; border-radius: 10px; color: white;">
+    <div style="background-color: #00008B; padding: 20px; border-radius: 10px; color: white;">
         <h1 style="margin: 0;">Machine Failure Prediction System</h1>
         <p style="margin: 0;">Predict equipment failures before they happen using advanced machine learning.</p>
     </div>
@@ -166,6 +169,13 @@ def load_model():
     try:
         model_data = joblib.load(MODEL_PATH)
         st.success("Loaded pre-trained model successfully!")
+        
+        # Backward compatibility check
+        required_keys = ['model', 'features', 'X_test', 'y_test']
+        if not all(key in model_data for key in required_keys):
+            st.warning("Old model format detected. Retraining new model...")
+            return train_and_save_model()
+            
         return model_data
     except Exception as e:
         st.warning(f"Error loading model: {str(e)}. Training a new model...")
@@ -175,14 +185,14 @@ def load_model():
 model_data = load_model()
 model = model_data['model']
 features = model_data['features']
-X_train = model_data['X_train']
-y_train = model_data['y_train']
-X_test = model_data['X_test']
-y_test = model_data['y_test']
-best_params = model_data['best_params']
+X_train = model_data.get('X_train', None)
+y_train = model_data.get('y_train', None)
+X_test = model_data.get('X_test', None)
+y_test = model_data.get('y_test', None)
+best_params = model_data.get('best_params', {})
 
 # Sidebar for user input
-st.sidebar.header("Machine Parameters")
+st.sidebar.markdown('<div class="sidebar-header">Machine Parameters</div>', unsafe_allow_html=True)
 st.sidebar.write("Enter current operating conditions:")
 
 # Feature information
@@ -225,7 +235,7 @@ for feature in features:
     if feature in feature_info:
         info = feature_info[feature]
         st.sidebar.markdown(f"**{feature}**")
-        st.sidebar.markdown(f'<div class="input-range">{info["desc"]}</div>', unsafe_allow_html=True)
+        st.sidebar.markdown(f'<div class="input-description">{info["desc"]}</div>', unsafe_allow_html=True)
         user_input[feature] = st.sidebar.number_input(
             label=f"Value in {info['unit']}",
             value=info['default'],
@@ -234,7 +244,6 @@ for feature in features:
             format="%.1f" if isinstance(info['default'], float) else "%d"
         )
     else:
-        # Handle other features (like one-hot encoded ones)
         user_input[feature] = 0.0
 
 # Prediction button
@@ -260,7 +269,7 @@ if st.sidebar.button("Predict Failure Risk"):
     # Explanation for Confidence Score
     st.markdown(
         """
-        <div class="explanation">
+        <div class="explanation" style="color: white;">
             The <span class="highlight">Confidence Score</span> represents the model's certainty in its prediction. 
             A score closer to <span class="highlight">1</span> indicates high confidence in failure prediction.
         </div>
@@ -279,98 +288,80 @@ if st.sidebar.button("Predict Failure Risk"):
     )
     st.plotly_chart(fig_feature_importance)
 
-    # Explanation for Feature Importance
-    st.markdown(
-        """
-        <div class="explanation">
-            The <span class="highlight">Feature Importance</span> plot shows which parameters most influence 
-            the prediction. Features with higher importance have greater impact on the model's decision.
-        </div>
-        """,
-        unsafe_allow_html=True
-    )
+    # Confusion Matrix (if test data available)
+    if X_test is not None and y_test is not None:
+        predictions_val = model.predict(X_test)
+        
+        # Confusion Matrix
+        st.markdown("<h2 style='color: white;'>Confusion Matrix</h2>", unsafe_allow_html=True)
+        conf_matrix = confusion_matrix(y_test, predictions_val)
+        fig_conf_matrix = px.imshow(
+            conf_matrix,
+            labels=dict(x="Predicted", y="Actual", color="Count"),
+            x=["No Failure", "Failure"],
+            y=["No Failure", "Failure"],
+            title="Confusion Matrix (Test Data)"
+        )
+        st.plotly_chart(fig_conf_matrix)
 
-    # Confusion Matrix
-    st.markdown("<h2 style='color: white;'>Confusion Matrix</h2>", unsafe_allow_html=True)
-    predictions_val = model.predict(X_test)
-    conf_matrix = confusion_matrix(y_test, predictions_val)
-    fig_conf_matrix = px.imshow(
-        conf_matrix,
-        labels=dict(x="Predicted", y="Actual", color="Count"),
-        x=["No Failure", "Failure"],
-        y=["No Failure", "Failure"],
-        title="Confusion Matrix (Test Data)"
-    )
-    st.plotly_chart(fig_conf_matrix)
+        # ROC Curve
+        st.markdown("<h2 style='color: white;'>ROC Curve</h2>", unsafe_allow_html=True)
+        fpr, tpr, thresholds = roc_curve(y_test, model.predict_proba(X_test)[:,1])
+        roc_auc = auc(fpr, tpr)
+        fig_roc = px.line(
+            x=fpr, 
+            y=tpr, 
+            title=f'ROC Curve (AUC = {roc_auc:.2f})',
+            labels={'x': 'False Positive Rate', 'y': 'True Positive Rate'}
+        )
+        fig_roc.add_shape(type='line', line=dict(dash='dash'), x0=0, x1=1, y0=0, y1=1)
+        st.plotly_chart(fig_roc)
 
-    # Explanation for Confusion Matrix
-    st.markdown(
-        """
-        <div class="explanation">
-            The <span class="highlight">Confusion Matrix</span> shows the model's performance on test data.
-            It displays correct and incorrect predictions for each class (Failure/No Failure).
-        </div>
-        """,
-        unsafe_allow_html=True
-    )
+        # Model Accuracy
+        accuracy_train = accuracy_score(y_train, model.predict(X_train)) if X_train is not None else None
+        accuracy_test = accuracy_score(y_test, predictions_val)
+        
+        st.markdown("<h2 style='color: white;'>Model Performance</h2>", unsafe_allow_html=True)
+        cols = st.columns(2)
+        with cols[0]:
+            st.markdown(
+                f"""
+                <div class="card">
+                    <h3>Training Accuracy</h3>
+                    <p>{accuracy_train:.2% if accuracy_train is not None else 'N/A'}</p>
+                </div>
+                """,
+                unsafe_allow_html=True
+            )
+        with cols[1]:
+            st.markdown(
+                f"""
+                <div class="card">
+                    <h3>Test Accuracy</h3>
+                    <p>{accuracy_test:.2%}</p>
+                </div>
+                """,
+                unsafe_allow_html=True
+            )
 
-    # ROC Curve
-    st.markdown("<h2 style='color: white;'>ROC Curve</h2>", unsafe_allow_html=True)
-    fpr, tpr, thresholds = roc_curve(y_test, model.predict_proba(X_test)[:,1])
-    roc_auc = auc(fpr, tpr)
-    fig_roc = px.line(
-        x=fpr, 
-        y=tpr, 
-        title=f'ROC Curve (AUC = {roc_auc:.2f})',
-        labels={'x': 'False Positive Rate', 'y': 'True Positive Rate'}
-    )
-    fig_roc.add_shape(type='line', line=dict(dash='dash'), x0=0, x1=1, y0=0, y1=1)
-    st.plotly_chart(fig_roc)
-
-    # Explanation for ROC Curve
-    st.markdown(
-        """
-        <div class="explanation">
-            The <span class="highlight">ROC Curve</span> shows the trade-off between the True Positive Rate and 
-            False Positive Rate. A higher AUC (Area Under Curve) indicates better model performance.
-        </div>
-        """,
-        unsafe_allow_html=True
-    )
-
-    # Model Accuracy
-    st.markdown("<h2 style='color: white;'>Model Performance</h2>", unsafe_allow_html=True)
-    accuracy_train = accuracy_score(y_train, model.predict(X_train))
-    accuracy_test = accuracy_score(y_test, predictions_val)
-    
-    # Display Model Accuracy in a card
-    st.markdown(
-        f"""
-        <div class="card">
-            <h3>Model Accuracy</h3>
-            <p>Training Data: {accuracy_train:.2f}</p>
-            <p>Test Data: {accuracy_test:.2f}</p>
-        </div>
-        """,
-        unsafe_allow_html=True
-    )
+        # Classification Report
+        st.markdown("<h2 style='color: white;'>Classification Report</h2>", unsafe_allow_html=True)
+        report = classification_report(y_test, predictions_val, output_dict=True)
+        report_df = pd.DataFrame(report).transpose()
+        st.dataframe(report_df.style.format("{:.2f}"))
 
     # Best Parameters
-    st.markdown(
-        f"""
-        <div class="card">
-            <h3>Optimal Model Parameters</h3>
-            <pre>{best_params}</pre>
-        </div>
-        """,
-        unsafe_allow_html=True
-    )
+    if best_params:
+        st.markdown("<h2 style='color: white;'>Optimal Model Parameters</h2>", unsafe_allow_html=True)
+        st.json(best_params)
 
-    # Classification Report
-    st.markdown("<h2 style='color: white;'>Classification Report</h2>", unsafe_allow_html=True)
-    report = classification_report(y_test, predictions_val, output_dict=True)
-    report_df = pd.DataFrame(report).transpose()
-    st.dataframe(report_df.style.format("{:.2f}"))
+# Main page content
+st.markdown("""
+<div class="card">
+    <p>This system predicts potential machine failures using a Random Forest classifier trained on historical equipment data.</p>
+    <p>Enter the current machine parameters in the sidebar and click <strong>Predict Failure Risk</strong> to get an assessment.</p>
+</div>
+""", unsafe_allow_html=True)
 
 # Model information
 with st.expander("Model Details"):
@@ -384,11 +375,12 @@ with st.expander("Model Details"):
     - Torque
     - Tool wear
     
-    **Data Source**: AI4I 2020 Predictive Maintenance Dataset
-    
     **Training Samples**: {:,}
     **Test Samples**: {:,}
-    """.format(len(X_train), len(X_test)))
+    """.format(
+        len(X_train) if X_train is not None else 0,
+        len(X_test) if X_test is not None else 0
+    ))
 
 # Data sample
 with st.expander("View Sample Data"):
