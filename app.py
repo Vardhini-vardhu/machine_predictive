@@ -13,13 +13,13 @@ from imblearn.over_sampling import SMOTE
 # Ignore warnings for cleaner output
 import warnings
 warnings.filterwarnings('ignore')
-
+  # background-color: #2f2f2f;
 # Custom CSS for styling
 st.markdown(
     """
     <style>
     .stApp {
-        background-color: #2f2f2f;
+      
         color: white;
         font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
     }
