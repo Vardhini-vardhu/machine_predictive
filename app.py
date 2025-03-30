@@ -322,60 +322,62 @@ if st.sidebar.button("Predict Failure Risk"):
         accuracy_test = accuracy_score(y_test, predictions_val)
         
         # Replace the Model Performance section with this:
+                # Replace the Model Performance section with this:
 
 # Model Performance
-st.markdown("<h2 style='color: white;'>Model Performance</h2>", unsafe_allow_html=True)
-
-if X_test is not None and y_test is not None:
-    predictions_val = model.predict(X_test)
-    accuracy_test = accuracy_score(y_test, predictions_val)
-    
-    # Create columns for metrics display
-    col1, col2 = st.columns(2)
-    
-    with col1:
-        if X_train is not None and y_train is not None:
-            accuracy_train = accuracy_score(y_train, model.predict(X_train))
-            st.markdown(
-                f"""
-                <div class="card">
-                    <h3>Training Accuracy</h3>
-                    <p>{accuracy_train:.2%}</p>
-                </div>
-                """,
-                unsafe_allow_html=True
-            )
+        st.markdown("<h2 style='color: white;'>Model Performance</h2>", unsafe_allow_html=True)
+        
+        if X_test is not None and y_test is not None:
+            predictions_val = model.predict(X_test)
+            accuracy_test = accuracy_score(y_test, predictions_val)
+            
+            # Create columns for metrics display
+            col1, col2 = st.columns(2)
+            
+            with col1:
+                if X_train is not None and y_train is not None:
+                    accuracy_train = accuracy_score(y_train, model.predict(X_train))
+                    st.markdown(
+                        f"""
+                        <div class="card">
+                            <h3>Training Accuracy</h3>
+                            <p>{accuracy_train:.2%}</p>
+                        </div>
+                        """,
+                        unsafe_allow_html=True
+                    )
+                else:
+                    st.markdown(
+                        """
+                        <div class="card">
+                            <h3>Training Accuracy</h3>
+                            <p>N/A</p>
+                        </div>
+                        """,
+                        unsafe_allow_html=True
+                    )
+            
+            with col2:
+                st.markdown(
+                    f"""
+                    <div class="card">
+                        <h3>Test Accuracy</h3>
+                        <p>{accuracy_test:.2%}</p>
+                    </div>
+                    """,
+                    unsafe_allow_html=True
+                )
         else:
             st.markdown(
                 """
                 <div class="card">
-                    <h3>Training Accuracy</h3>
-                    <p>N/A</p>
+                    <h3>Model Performance</h3>
+                    <p>Test data not available for evaluation</p>
                 </div>
                 """,
                 unsafe_allow_html=True
             )
-    
-    with col2:
-        st.markdown(
-            f"""
-            <div class="card">
-                <h3>Test Accuracy</h3>
-                <p>{accuracy_test:.2%}</p>
-            </div>
-            """,
-            unsafe_allow_html=True
-        )
-else:
-    st.markdown(
-        """
-        <div class="card">
-            <h3>Model Performance</h3>
-            <p>Test data not available for evaluation</p>
-        </div>
-        """,
-        unsafe_allow_html=True
-    )
+
         # Classification Report
         st.markdown("<h2 style='color: white;'>Classification Report</h2>", unsafe_allow_html=True)
         report = classification_report(y_test, predictions_val, output_dict=True)
