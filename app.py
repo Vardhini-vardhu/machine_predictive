@@ -13,7 +13,7 @@ st.markdown(
     """
     <style>
     .stApp {
-        background-color: #f5f5f5;
+        background-color: #2c3e50;
         color:black;
         font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
     }
@@ -140,7 +140,10 @@ def load_model():
     
     try:
         model_data = joblib.load(MODEL_PATH)
-        st.success("Loaded pre-trained model successfully!")
+        # st.success("Loaded pre-trained model successfully!")
+        <div style="background-color: #fdecea; padding: 15px; border-radius: 5px; margin-bottom: 20px;color:black;">
+            <p style="margin: 0;">Loaded pre-trained model successfully!.</p>
+        </div>
         return model_data
     except Exception as e:
         st.warning(f"Error loading model: {str(e)}. Training a new model...")
