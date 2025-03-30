@@ -6,8 +6,7 @@ from sklearn.ensemble import RandomForestClassifier
 from sklearn.model_selection import train_test_split
 from sklearn.metrics import accuracy_score, roc_curve, auc, confusion_matrix, classification_report
 import joblib
-import matplotlib.pyplot as plt
-import seaborn as sns
+import os
 
 # Custom CSS for styling
 st.markdown(
@@ -73,25 +72,17 @@ st.markdown(
     unsafe_allow_html=True
 )
 
-# Load or train model function
-def load_or_train_model():
+# Constants
+MODEL_PATH = 'machine_failure_model.pkl'
+DATA_FILE = 'machine.csv'  # Local file in the same repository
+
+def train_and_save_model():
+    """Train the model and save to disk"""
     try:
-        # Try to load pre-trained model
-        model_data = joblib.load('machine_failure_model.pkl')
-        st.success("Loaded pre-trained model successfully!")
-        return model_data['model'], model_data['features'], model_data['X_test'], model_data['y_test']
-    except:
-        st.warning("Training new model... This may take a minute.")
+        # Load data from local file
+        df = pd.read_csv(DATA_FILE)
         
-        # Load dataset
-        @st.cache_data
-        def load_data():
-            url = "machine.csv"
-            return pd.read_csv(url)
-        
-        df = load_data()
-        
-        # Data preprocessing
+        # Preprocessing
         df.drop(['UDI', 'Product ID'], axis=1, inplace=True)
         df = pd.get_dummies(df, drop_first=True)
         
@@ -104,7 +95,7 @@ def load_or_train_model():
             X, y, test_size=0.3, random_state=42
         )
         
-        # Train Random Forest model
+        # Train model
         model = RandomForestClassifier(
             n_estimators=200,
             max_depth=10,
@@ -113,22 +104,46 @@ def load_or_train_model():
             random_state=42,
             n_jobs=-1
         )
-        
         model.fit(X_train, y_train)
         
         # Save model
-        joblib.dump({
+        model_data = {
             'model': model,
             'features': X.columns.tolist(),
             'X_test': X_test,
             'y_test': y_test
-        }, 'machine_failure_model.pkl')
-        
-        st.success("Model trained and saved successfully!")
-        return model, X.columns.tolist(), X_test, y_test
+        }
+        joblib.dump(model_data, MODEL_PATH)
+        return model_data
+    except Exception as e:
+        st.error(f"Error training model: {str(e)}")
+        return None
+
+def load_model():
+    """Load model from disk or train if not exists"""
+    if not os.path.exists(MODEL_PATH):
+        st.info("No pre-trained model found. Training a new model...")
+        return train_and_save_model()
+    
+    try:
+        model_data = joblib.load(MODEL_PATH)
+        st.success("Loaded pre-trained model successfully!")
+        return model_data
+    except Exception as e:
+        st.warning(f"Error loading model: {str(e)}. Training a new model...")
+        return train_and_save_model()
 
 # Load or train model
-model, features, X_test, y_test = load_or_train_model()
+model_data = load_model()
+
+if model_data is None:
+    st.error("Failed to initialize model. Please check your data file.")
+    st.stop()
+
+model = model_data['model']
+features = model_data['features']
+X_test = model_data['X_test']
+y_test = model_data['y_test']
 
 # Sidebar for user input
 st.sidebar.markdown('<div class="sidebar-header">Machine Parameters</div>', unsafe_allow_html=True)
@@ -256,7 +271,6 @@ if st.sidebar.button("Predict Failure Risk", key="predict_button"):
         x=fpr, y=tpr,
         title=f'ROC Curve (AUC = {roc_auc:.2f})',
         labels=dict(x='False Positive Rate', y='True Positive Rate')
-    )
     fig_roc.add_shape(type='line', line=dict(dash='dash'), x0=0, x1=1, y0=0, y1=1)
     st.plotly_chart(fig_roc, use_container_width=True)
     
@@ -268,8 +282,7 @@ if st.sidebar.button("Predict Failure Risk", key="predict_button"):
         importance,
         orientation='h',
         title='Most Important Features',
-        labels={'index': 'Feature', 'value': 'Importance'}
-    )
+        labels={'index': 'Feature', 'value': 'Importance'})
     st.plotly_chart(fig_importance, use_container_width=True)
 
 # Main page content
@@ -302,8 +315,11 @@ with st.expander("Model Details"):
     - Tool wear
     """)
 
-# Data sample
+# Data sample - Now using local file
 with st.expander("Sample Data"):
-    url = "https://raw.githubusercontent.com/dataprofessor/data/master/ai4i2020.csv"
-    sample_data = pd.read_csv(url).head(5)
-    st.dataframe(sample_data)
+    try:
+        sample_data = pd.read_csv(DATA_FILE).head(5)
+        st.dataframe(sample_data)
+    except Exception as e:
+        st.error(f"Could not load sample data: {str(e)}")
+        st.info("Please ensure 'machine.csv' exists in your repository")
