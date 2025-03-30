@@ -24,7 +24,7 @@ st.markdown(
         font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
     }
     .stSidebar {
-        background-color: #2c3e50;
+        background-color:#192734;
         padding: 20px;
         border-radius: 10px;
     }
@@ -83,7 +83,7 @@ st.markdown(
     """,
     unsafe_allow_html=True
 )
-
+#2c3e50
 # Constants
 MODEL_PATH = 'machine_failure_model.pkl'
 DATA_FILE = 'machine.csv'
@@ -91,7 +91,7 @@ DATA_FILE = 'machine.csv'
 # Hero Section
 st.markdown(
     """
-    <div style="background-color:#192724; padding: 20px; border-radius: 10px; color: white;">
+    <div style="background-color:#192734; padding: 20px; border-radius: 10px; color: white;">
         <h1 style="margin: 0;">Machine Failure Prediction System</h1>
         <p style="margin: 0;">Predict equipment failures before they happen using advanced machine learning.</p>
     </div>
