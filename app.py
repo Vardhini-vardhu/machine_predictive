@@ -13,7 +13,7 @@ st.markdown(
     """
     <style>
     .stApp {
-        background-color: #2c3e50;
+        background-color: #2f2f2f;
         color:black;
         font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
     }
