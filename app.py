@@ -40,8 +40,8 @@ st.markdown(
         font-weight: 500 !important;
     }
     .stButton button {
-        background-color: black;
-        color: white;
+        background-color: #8899A6;
+        color: black;
         border: none;
         border-radius: 5px;
         padding: 10px 24px;
@@ -51,8 +51,8 @@ st.markdown(
         transition: all 0.3s;
     }
     .stButton button:hover {
-        background-color: #8899A6;
-        color: black;
+        background-color: #424242;
+        color: white;
         transform: translateY(-1px);
         box-shadow: 0 2px 5px rgba(0,0,0,0.2);
     }
