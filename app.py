@@ -13,13 +13,13 @@ from imblearn.over_sampling import SMOTE
 # Ignore warnings for cleaner output
 import warnings
 warnings.filterwarnings('ignore')
-
+ # background-color: #2f2f2f;
 # Custom CSS for styling
 st.markdown(
     """
     <style>
     .stApp {
-        background-color: #2f2f2f;
+       
         color: white;
         font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
     }
@@ -89,15 +89,6 @@ MODEL_PATH = 'machine_failure_model.pkl'
 DATA_FILE = 'machine.csv'
 
 # Hero Section
-st.markdown(
-    """
-    <div style="background-color: #00008B; padding: 20px; border-radius: 10px; color: white;">
-        <h1 style="margin: 0;">Machine Failure Prediction System</h1>
-        <p style="margin: 0;">Predict equipment failures before they happen using advanced machine learning.</p>
-    </div>
-    """,
-    unsafe_allow_html=True
-)
 
 def load_data():
     """Load data from local file with error handling"""
@@ -180,6 +171,15 @@ def load_model():
     except Exception as e:
         st.warning(f"Error loading model: {str(e)}. Training a new model...")
         return train_and_save_model()
+st.markdown(
+    """
+    <div style="background-color: #00008B; padding: 20px; border-radius: 10px; color: white;">
+        <h1 style="margin: 0;">Machine Failure Prediction System</h1>
+        <p style="margin: 0;">Predict equipment failures before they happen using advanced machine learning.</p>
+    </div>
+    """,
+    unsafe_allow_html=True
+)
 
 # Load or train model
 model_data = load_model()
