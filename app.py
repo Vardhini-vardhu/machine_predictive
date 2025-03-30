@@ -15,16 +15,17 @@ import warnings
 warnings.filterwarnings('ignore')
  # background-color: #2f2f2f;
 # Custom CSS for styling
+# Custom CSS for styling
 st.markdown(
     """
     <style>
     .stApp {
-       
-        color: white;
+        color:white;
         font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
     }
     .stSidebar {
         background-color: #2c3e50;
+        color: black;
         padding: 20px;
         border-radius: 10px;
     }
@@ -71,7 +72,7 @@ st.markdown(
     .card {
         background-color: white;
         padding: 20px;
-        color: black;
+        color:black;
         border-radius: 10px;
         box-shadow: 0 2px 10px rgba(0,0,0,0.1);
         margin-bottom: 20px;
@@ -83,6 +84,7 @@ st.markdown(
     """,
     unsafe_allow_html=True
 )
+
 
 # Constants
 MODEL_PATH = 'machine_failure_model.pkl'
