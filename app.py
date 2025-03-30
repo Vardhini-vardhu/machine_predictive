@@ -51,7 +51,7 @@ st.markdown(
         transition: all 0.3s;
     }
     .stButton button:hover {
-        background-color: #192724;
+        background-color: #8899A6;
         transform: translateY(-1px);
         box-shadow: 0 2px 5px rgba(0,0,0,0.2);
     }
