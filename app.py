@@ -8,12 +8,12 @@ from sklearn.metrics import accuracy_score, roc_curve, auc, confusion_matrix
 import joblib
 import os
 
+        # background-color: #2f2f2f;
 # Custom CSS for styling
 st.markdown(
     """
     <style>
     .stApp {
-        background-color: #2f2f2f;
         color:black;
         font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
     }
