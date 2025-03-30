@@ -140,10 +140,7 @@ def load_model():
     
     try:
         model_data = joblib.load(MODEL_PATH)
-        # st.success("Loaded pre-trained model successfully!")
-        <div style="background-color: #fdecea; padding: 15px; border-radius: 5px; margin-bottom: 20px;color:black;">
-            <p style="margin: 0;">Loaded pre-trained model successfully!.</p>
-        </div>
+        st.success("Loaded pre-trained model successfully!")
         return model_data
     except Exception as e:
         st.warning(f"Error loading model: {str(e)}. Training a new model...")
