@@ -91,7 +91,7 @@ DATA_FILE = 'machine.csv'
 # Hero Section
 st.markdown(
     """
-    <div style=" padding: 20px; border-radius: 10px; color: white;">
+    <div style="background-color:#22303C; padding: 20px; border-radius: 10px; color: white;">
         <h1 style="margin: 0;">Machine Failure Prediction System</h1>
         <p style="margin: 0;">Predict equipment failures before they happen using advanced machine learning.</p>
     </div>
