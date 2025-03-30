@@ -112,7 +112,7 @@ def load_or_train_model():
         return model_data['model'], model_data['features']
     except:
         st.warning("No pre-trained model found. Training a new model...")
-        df = pd.read_csv('ai4i2020.csv')
+        df = pd.read_csv('machine.csv')
         df.drop(['UDI', 'Product ID'], axis=1, inplace=True)
         df = pd.get_dummies(df, drop_first=True)
         
