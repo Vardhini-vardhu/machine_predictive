@@ -18,6 +18,7 @@ st.markdown(
     }
     .stSidebar {
         background-color: #2c3e50;
+        color: black;
         padding: 20px;
         border-radius: 10px;
     }
@@ -33,7 +34,7 @@ st.markdown(
         font-weight: 500 !important;
     }
     .stButton button {
-        background-color: #3498db;
+        background-color: #00008B;
         color: white;
         border: none;
         border-radius: 5px;
@@ -64,6 +65,7 @@ st.markdown(
     .card {
         background-color: white;
         padding: 20px;
+        color:black;
         border-radius: 10px;
         box-shadow: 0 2px 10px rgba(0,0,0,0.1);
         margin-bottom: 20px;
@@ -220,14 +222,14 @@ if st.sidebar.button("Predict Failure Risk", key="predict_button"):
     if prediction == 1:
         st.error(f"⚠️ High Risk of Failure (Probability: {probability:.1%})")
         st.markdown("""
-        <div style="background-color: #fdecea; padding: 15px; border-radius: 5px; margin-bottom: 20px;">
+        <div style="background-color: #fdecea; padding: 15px; border-radius: 5px; margin-bottom: 20px;color:black;">
             <p style="margin: 0;">Recommend immediate maintenance inspection. Parameters indicate potential failure conditions.</p>
         </div>
         """, unsafe_allow_html=True)
     else:
         st.success(f"✅ Normal Operation (Probability: {1-probability:.1%})")
         st.markdown("""
-        <div style="background-color: #e8f5e9; padding: 15px; border-radius: 5px; margin-bottom: 20px;">
+        <div style="background-color: #e8f5e9; padding: 15px; border-radius: 5px;color:black; margin-bottom: 20px;">
             <p style="margin: 0;">Machine operating within normal parameters. Continue routine monitoring.</p>
         </div>
         """, unsafe_allow_html=True)
