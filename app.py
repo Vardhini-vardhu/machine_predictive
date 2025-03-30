@@ -14,6 +14,7 @@ st.markdown(
     <style>
     .stApp {
         background-color: #f5f5f5;
+        color:black;
         font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
     }
     .stSidebar {
