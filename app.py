@@ -92,7 +92,7 @@ DATA_FILE = 'machine.csv'
 # Hero Section
 st.markdown(
     """
-    <div style="background-color:#192734; padding: 20px; border-radius: 10px; color: white;">
+    <div style="background-color:#192734; padding: 20px; border-radius: 10px; color: black;">
         <h1 style="margin: 0;">Machine Failure Prediction System</h1>
         <p style="margin: 0;">Predict equipment failures before they happen using advanced machine learning.</p>
     </div>
@@ -270,7 +270,7 @@ if st.sidebar.button("Predict Failure Risk"):
     # Explanation for Confidence Score
     st.markdown(
         """
-        <div class="explanation" style="color: white;">
+        <div class="explanation" style="color: black;">
             The <span class="highlight">Confidence Score</span> represents the model's certainty in its prediction. 
             A score closer to <span class="highlight">1</span> indicates high confidence in failure prediction.
         </div>
@@ -279,7 +279,7 @@ if st.sidebar.button("Predict Failure Risk"):
     )
     
     # Feature Importance Plot
-    st.markdown("<h2 style='color: white;'>Feature Importance</h2>", unsafe_allow_html=True)
+    st.markdown("<h2 style='color: black;'>Feature Importance</h2>", unsafe_allow_html=True)
     feature_importances = model.feature_importances_
     fig_feature_importance = px.bar(
         x=features, 
@@ -294,7 +294,7 @@ if st.sidebar.button("Predict Failure Risk"):
         predictions_val = model.predict(X_test)
         
         # Confusion Matrix
-        st.markdown("<h2 style='color: white;'>Confusion Matrix</h2>", unsafe_allow_html=True)
+        st.markdown("<h2 style='color: black;'>Confusion Matrix</h2>", unsafe_allow_html=True)
         conf_matrix = confusion_matrix(y_test, predictions_val)
         fig_conf_matrix = px.imshow(
             conf_matrix,
@@ -306,7 +306,7 @@ if st.sidebar.button("Predict Failure Risk"):
         st.plotly_chart(fig_conf_matrix)
 
         # ROC Curve
-        st.markdown("<h2 style='color: white;'>ROC Curve</h2>", unsafe_allow_html=True)
+        st.markdown("<h2 style='color: black;'>ROC Curve</h2>", unsafe_allow_html=True)
         fpr, tpr, thresholds = roc_curve(y_test, model.predict_proba(X_test)[:,1])
         roc_auc = auc(fpr, tpr)
         fig_roc = px.line(
@@ -319,7 +319,7 @@ if st.sidebar.button("Predict Failure Risk"):
         st.plotly_chart(fig_roc)
 
         # Model Performance
-        st.markdown("<h2 style='color: white;'>Model Performance</h2>", unsafe_allow_html=True)
+        st.markdown("<h2 style='color: black;'>Model Performance</h2>", unsafe_allow_html=True)
         
         if X_test is not None and y_test is not None:
             predictions_val = model.predict(X_test)
@@ -373,14 +373,14 @@ if st.sidebar.button("Predict Failure Risk"):
             )
 
         # Classification Report
-        st.markdown("<h2 style='color: white;'>Classification Report</h2>", unsafe_allow_html=True)
+        st.markdown("<h2 style='color: black;'>Classification Report</h2>", unsafe_allow_html=True)
         report = classification_report(y_test, predictions_val, output_dict=True)
         report_df = pd.DataFrame(report).transpose()
         st.dataframe(report_df.style.format("{:.2f}"))
 
     # Best Parameters
     if best_params:
-        st.markdown("<h2 style='color: white;'>Optimal Model Parameters</h2>", unsafe_allow_html=True)
+        st.markdown("<h2 style='color: black;'>Optimal Model Parameters</h2>", unsafe_allow_html=True)
         st.json(best_params)
 
 # Main page content
