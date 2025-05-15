@@ -57,7 +57,7 @@ st.markdown(
         box-shadow: 0 2px 5px rgba(0,0,0,0.2);
     }
     .input-description {
-        color: black;
+        color: white;
         font-size: 12px;
         margin-top: -10px;
         margin-bottom: 15px;
