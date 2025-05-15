@@ -30,13 +30,13 @@ st.markdown(
     }
     .stNumberInput input, .stTextInput input {
         background-color: #ecf0f1 !important;
-        color: white!important;
+        color: black!important;
         border: 1px solid #bdc3c7 !important;
         border-radius: 5px !important;
         padding: 8px 12px !important;
     }
     .stNumberInput label, .stTextInput label {
-        color:input !important;
+        color:black !important;
         font-weight: 500 !important;
     }
     .stButton button {
@@ -72,7 +72,7 @@ st.markdown(
     .card {
         background-color: white;
         padding: 20px;
-        color: white;
+        color: black;
         border-radius: 10px;
         box-shadow: 0 2px 10px rgba(0,0,0,0.1);
         margin-bottom: 20px;
