@@ -63,7 +63,7 @@ st.markdown(
         margin-bottom: 15px;
     }
     .sidebar-header {
-        color: #ecf0f1;
+        color: white;
         font-size: 1.5rem;
         margin-bottom: 20px;
         border-bottom: 2px solid #3498db;
