@@ -20,7 +20,7 @@ st.markdown(
     <style>
     .stApp {
       
-        color: white;
+        color: black;
         font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
     }
     .stSidebar {
