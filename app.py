@@ -26,6 +26,7 @@ st.markdown(
     .stSidebar {
         background-color:#192734;
         padding: 20px;
+        color:white;
         border-radius: 10px;
     }
     .stNumberInput input, .stTextInput input {
